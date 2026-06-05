@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>梦蝶AI · Dream Butterfly</title>
+    <style>
+        :root{
+            --bg:#050816;
+            --bg2:#0d1028;
+            --cyan:#49f5ff;
+            --pink:#ff4fd8;
+            --gold:#ffd76b;
+            --purple:#7d5cff;
+            --glass:rgba(255,255,255,.08);
+            --border:rgba(255,255,255,.15);
+        }
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+        html{
+            scroll-behavior:smooth;
+        }
+        body{
+            font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+            background: radial-gradient(circle at 20% 20%, rgba(125,92,255,.25), transparent 30%), radial-gradient(circle at 80% 30%, rgba(73,245,255,.15), transparent 35%), radial-gradient(circle at 50% 80%, rgba(255,79,216,.15), transparent 35%), #050816;
+            color:#fff;
+            overflow-x:hidden;
+        }
+        /* 星空 */
+        #stars{
+            position:fixed;
+            inset:0;
+            z-index:-2;
+        }
+        /* 光晕 */
+        .glow{
+            position:fixed;
+            width:700px;
+            height:700px;
+            border-radius:50%;
+            filter:blur(140px);
+            opacity:.18;
+            z-index:-1;
+            pointer-events:none;
+        }
+        .g1{
+            background:var(--cyan);
+            top:-250px;
+            left:-200px;
+        }
+        .g2{
+            background:var(--pink);
+            right:-250px;
+            top:20%;
+        }
+        .g3{
+            background:var(--purple);
+            bottom:-250px;
+            left:35%;
+        }
+        /* 导航 */
+        .nav{
+            position:fixed;
+            top:0;
+            width:100%;
+            z-index:999;
+            padding:18px 6%;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            backdrop-filter:blur(20px);
+            background:rgba(255,255,255,.04);
+            border-bottom:1px solid rgba(255,255,255,.08);
+            transition:.35s;
+        }
+        .nav.scrolled{
+            background:rgba(5,8,22,.75);
+            box-shadow:0 10px 35px rgba(0,0,0,.45);
+        }
+        .logo{
+            font-size:1.2rem;
+            font-weight:700;
+            letter-spacing:.5px;
+            background:linear-gradient(90deg,var(--cyan),#fff,var(--pink));
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+        .nav-btn{
+            padding:12px 24px;
+            border:none;
+            border-radius:999px;
+            color:#fff;
+            cursor:pointer;
+            font-weight:600;
+            background:linear-gradient(135deg,var(--cyan),var(--purple),var(--pink));
+            box-shadow:0 0 20px rgba(73,245,255,.5);
+            animation:pulse 2.5s infinite;
+        }
+        @keyframes pulse{
+            0%,100%{
+                transform:scale(1);
+                box-shadow:0 0 20px rgba(73,245,255,.4);
+            }
+            50%{
+                transform:scale(1.04);
+                box-shadow:0 0 40px rgba(255,79,216,.7);
+            }
+        }
+        /* HERO */
+        .hero{
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            padding:0 20px;
+            position:relative;
+        }
+        .hero-content{
+            max-width:1100px;
+        }
+        .hero h1{
+            font-size:clamp(3rem,7vw,6rem);
+            line-height:1.1;
+            margin-bottom:20px;
+            min-height:1.2em;
+            font-weight:900;
+        }
+        .gradient-text{
+            background:linear-gradient(90deg,var(--cyan),#fff,var(--gold),var(--pink));
+            background-size:300%;
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            animation:gradientMove 8s linear infinite;
+        }
+        @keyframes gradientMove{
+            0%{background-position:0%}
+            100%{background-position:300%}
+        }
+        .hero p{
+            font-size:1.25rem;
+            color:rgba(255,255,255,.85);
+            margin-bottom:40px;
+        }
+        .cta{
+            border:none;
+            color:#fff;
+            cursor:pointer;
+            font-size:1.1rem;
+            font-weight:700;
+            padding:18px 42px;
+            border-radius:999px;
+            background:linear-gradient(135deg,var(--cyan),var(--purple),var(--pink));
+            transition:.4s;
+            position:relative;
+            overflow:hidden;
+        }
+        .cta:hover{
+            transform:translateY(-4px) scale(1.03);
+            box-shadow:0 0 45px rgba(255,79,216,.7);
+        }
+        .cta::before{
+            content:"";
+            position:absolute;
+            inset:-100%;
+            background:linear-gradient(120deg,transparent,rgba(255,255,255,.45),transparent);
+            animation:shine 4s infinite;
+        }
+        @keyframes shine{
+            to{
+                transform:translateX(220%);
+            }
+        }
+        /* 蝴蝶 */
+        .butterfly{
+            position:absolute;
+            color:rgba(255,255,255,.65);
+            font-size:22px;
+            animation:fly linear infinite;
+            text-shadow:0 0 12px var(--cyan);
+        }
+        @keyframes fly{
+            from{
+                transform:translateY(110vh) rotate(0deg);
+            }
+            to{
+                transform:translateY(-120vh) translateX(120px) rotate(360deg);
+            }
+        }
+        .section{
+            width:min(1300px,92%);
+            margin:auto;
+            padding:100px 0;
+        }
+        .section-title{
+            text-align:center;
+            margin-bottom:60px;
+            font-size:clamp(2rem,4vw,3rem);
+            font-weight:800;
+        }
+        .cards{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+            gap:28px;
+        }
+        .card{
+            position:relative;
+            padding:32px;
+            min-height:260px;
+            border-radius:26px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.1);
+            backdrop-filter:blur(20px);
+            overflow:hidden;
+            transition:.5s;
+            transform-style:preserve-3d;
+        }
+        .card:hover{
+            transform:translateY(-10px) rotateX(8deg) rotateY(-8deg);
+            box-shadow:0 25px 60px rgba(73,245,255,.18);
+        }
+        .card::before{
+            content:"";
+            position:absolute;
+            inset:-1px;
+            border-radius:inherit;
+            background:linear-gradient(135deg,var(--cyan),transparent,var(--pink));
+            opacity:0;
+            transition:.5s;
+        }
+        .card:hover::before{
+            opacity:.25;
+        }
+        .card h3{
+            font-size:1.25rem;
+            margin-bottom:16px;
+        }
+        .card p{
+            color:rgba(255,255,255,.82);
+            line-height:1.8;
+        }
+        /* 免费横幅 */
+        .banner{
+            width:min(1200px,92%);
+            margin:20px auto;
+            padding:30px;
+            text-align:center;
+            border-radius:24px;
+            background:linear-gradient(135deg, rgba(255,215,107,.15), rgba(255,79,216,.15), rgba(73,245,255,.15));
+            border:1px solid rgba(255,255,255,.12);
+            backdrop-filter:blur(25px);
+            font-size:1.3rem;
+            font-weight:700;
+            box-shadow:0 0 40px rgba(255,215,107,.15);
+        }
+        /* feedback */
+        .feedback{
+            perspective:1200px;
+        }
+        .feedback-card{
+            max-width:850px;
+            margin:auto;
+            padding:60px;
+            border-radius:30px;
+            text-align:center;
+            background:rgba(255,255,255,.05);
+            backdrop-filter:blur(25px);
+            border:1px solid rgba(255,255,255,.1);
+            transition:.8s;
+        }
+        .feedback-card:hover{
+            transform:rotateY(8deg) rotateX(4deg);
+        }
+        .feedback-card h3{
+            font-size:2rem;
+            margin-bottom:20px;
+        }
+        .feedback-card p{
+            line-height:1.9;
+            color:rgba(255,255,255,.85);
+        }
+        .mail{
+            margin-top:25px;
+            font-size:1.3rem;
+            color:var(--cyan);
+            animation:mailPulse 2s infinite;
+        }
+        @keyframes mailPulse{
+            50%{
+                text-shadow:0 0 18px var(--cyan);
+                transform:scale(1.05);
+            }
+        }
+        /* form */
+        .form-section{
+            position:relative;
+        }
+        .form-wrap{
+            max-width:780px;
+            margin:auto;
+            text-align:center;
+            padding:70px 40px;
+            border-radius:32px;
+            background: radial-gradient(circle at 20% 20%, rgba(73,245,255,.2), transparent), radial-gradient(circle at 80% 30%, rgba(255,79,216,.2), transparent), rgba(255,255,255,.04);
+            backdrop-filter:blur(30px);
+            border:1px solid rgba(255,255,255,.1);
+        }
+        .form-wrap h2{
+            margin-bottom:35px;
+            font-size:2.5rem;
+        }
+        .form{
+            display:flex;
+            gap:16px;
+            flex-wrap:wrap;
+            justify-content:center;
+        }
+        input{
+            flex:1;
+            min-width:250px;
+            padding:18px 20px;
+            border-radius:18px;
+            outline:none;
+            color:#fff;
+            background:rgba(255,255,255,.08);
+            border:1px solid rgba(255,255,255,.15);
+            transition:.3s;
+        }
+        input:focus{
+            box-shadow:0 0 30px rgba(73,245,255,.45);
+            border-color:var(--cyan);
+        }
+        .submit-btn{
+            padding:18px 34px;
+            border:none;
+            border-radius:18px;
+            cursor:pointer;
+            color:#fff;
+            font-weight:700;
+            background:linear-gradient(135deg,var(--cyan),var(--purple),var(--pink));
+            transition:.3s;
+        }
+        .submit-btn:hover{
+            transform:translateY(-3px);
+            box-shadow:0 0 30px rgba(255,79,216,.5);
+        }
+        .success{
+            opacity:0;
+            margin-top:24px;
+            color:#8dffbb;
+            transition:.6s;
+        }
+        .success.show{
+            opacity:1;
+        }
+        /* footer */
+        footer{
+            text-align:center;
+            padding:60px 20px;
+            color:rgba(255,255,255,.6);
+            font-size:.92rem;
+            line-height:1.9;
+        }
+        .footer-link{
+            color:var(--cyan);
+            word-break:break-all;
+        }
+        .reveal{
+            opacity:0;
+            transform:translateY(40px);
+            transition:.8s;
+        }
+        .reveal.visible{
+            opacity:1;
+            transform:none;
+        }
+        @media(max-width:768px){
+            .hero p{
+                font-size:1rem;
+            }
+            .feedback-card{
+                padding:40px 25px;
+            }
+            .form{
+                flex-direction:column;
+            }
+            .submit-btn{
+                width:100%;
+            }
+            input{
+                width:100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars"></canvas>
+    <div class="glow g1"></div>
+    <div class="glow g2"></div>
+    <div class="glow g3"></div>
+    <nav class="nav" id="nav">
+        <div class="logo">梦蝶AI · Dream Butterfly</div>
+        <button class="nav-btn" onclick="scrollToForm()">申请内测</button>
+    </nav>
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="gradient-text" id="typing"></h1>
+            <p>沉浸式角色扮演 · 无限记忆 · 流式对话</p>
+            <button class="cta" onclick="scrollToForm()">
+                立即申请内测（免费）
+            </button>
+        </div>
+    </section>
+    <section class="section reveal">
+        <h2 class="section-title gradient-text">
+            梦蝶AI 核心亮点
+        </h2>
+        <div class="cards">
+            <div class="card">
+                <h3>🔒 100%数据自主掌控</h3>
+                <p>
+                    你的聊天记录、角色数据完全归你所有，
+                    不做任何第三方共享，严格用户隔离。
+                </p>
+            </div>
+            <div class="card">
+                <h3>🧠 永久长记忆</h3>
+                <p>
+                    智能保留每次对话上下文，
+                    即使隔天再聊，AI依然记得你的故事。
+                </p>
+            </div>
+            <div class="card">
+                <h3>🎭 海量角色卡 & 自主创作</h3>
+                <p>
+                    支持私有/公开角色发布，
+                    支持头像、人设、世界书JSON自由构建。
+                </p>
+            </div>
+            <div class="card">
+                <h3>💎 Pro+多模型切换</h3>
+                <p>
+                    普通用户每日免费50次，
+                    Pro+支持Deepseek、GPT-4o等模型自由切换。
+                </p>
+            </div>
+            <div class="card">
+                <h3>💬 流式回复·打字机效果</h3>
+                <p>
+                    像真人一样逐字输出，
+                    对话体验真实、自然、丝滑。
+                </p>
+            </div>
+            <div class="card">
+                <h3>🛡️ 隐私与安全第一</h3>
+                <p>
+                    bcrypt密码加密、JWT认证、
+                    全接口鉴权，让你的秘密只属于你。
+                </p>
+            </div>
+             <div class="card">
+                <h3>🔞 无违禁词、打造您的专属伴侣</h3>
+                <p>
+                    AI满血模式、无违禁词、
+                    认真打造您的专属完美伴侣。
+               
+                </p>
+            </div>
+        </div>
+    </section>
+    <div class="banner reveal">
+        🔥 内测期间完全免费！我们最在乎你的意见和反馈，
+        每一次建议都会让梦蝶变得更好。
+    </div>
+    <section class="section feedback reveal">
+        <div class="feedback-card">
+            <h3 class="gradient-text">你的声音，至关重要</h3>
+            <p>
+                内测期间我们将根据用户反馈快速迭代，
+                持续优化角色记忆、沉浸体验与交互细节。
+                每一条建议都可能改变梦蝶AI的未来。
+            </p>
+            <div class="mail"> ✉ dreambutterflyai@163.com </div>
+        </div>
+    </section>
+    <section class="section form-section reveal" id="apply">
+        <div class="form-wrap">
+            <h2 class="gradient-text"> ✨ 获取内测资格 · 限时免费 </h2>
+            <!-- 已替换formspree地址 + 提交成功弹窗 -->
+            <form class="form" id="betaForm" action="https://formspree.io/f/xvznggvl" method="POST" onsubmit="setTimeout(()=>document.getElementById('success').classList.add('show'),200)">
+                <input type="email" name="email" id="email" placeholder="请输入邮箱地址" required />
+                <button class="submit-btn" type="submit">
+                    提交申请
+                </button>
+            </form>
+            <div class="success" id="success">
+                🎉 申请已收到！我们会尽快通过邮箱联系你。
+            </div>
+        </div>
+    </section>
+    <footer>
+        <div>
+            本产品AI聊天能力基于SillyTavern开源项目提供，
+            遵循AGPL v3协议，
+            项目地址： <span class="footer-link"> https://github.com/SillyTavern/SillyTavern </span>
+        </div>
+        <div style="margin-top:14px">
+            © 2026 梦蝶AI · 让每一次对话都有回响
+        </div>
+    </footer>
+    <script>
+        /* 星空粒子 */
+        const canvas = document.getElementById("stars");
+        const ctx = canvas.getContext("2d");
+        let stars = [];
+        function resize(){
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+        }
+        resize();
+        addEventListener("resize",resize);
+        for(let i=0;i<260;i++){
+            stars.push({
+                x:Math.random()*innerWidth,
+                y:Math.random()*innerHeight,
+                r:Math.random()*2,
+                v:Math.random()*0.25+0.05
+            });
+        }
+        function animateStars(){
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            stars.forEach(s=>{
+                ctx.beginPath();
+                ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+                ctx.fillStyle="rgba(255,255,255,.85)";
+                ctx.fill();
+                s.y+=s.v;
+                if(s.y>canvas.height){
+                    s.y=0;
+                    s.x=Math.random()*canvas.width;
+                }
+            });
+            requestAnimationFrame(animateStars);
+        }
+        animateStars();
+        /* 蝴蝶光点 */
+        for(let i=0;i<18;i++){
+            const b=document.createElement("div");
+            b.className="butterfly";
+            b.innerHTML="🦋";
+            b.style.left=Math.random()*100+"vw";
+            b.style.animationDuration=(20+Math.random()*25)+"s";
+            b.style.animationDelay=(-Math.random()*20)+"s";
+            b.style.opacity=Math.random();
+            document.body.appendChild(b);
+        }
+        /* 打字机 */
+        const text="与灵魂对话的AI伴侣";
+        const target=document.getElementById("typing");
+        let index=0;
+        (function type(){
+            if(index<text.length){
+                target.textContent += text[index++];
+                setTimeout(type,120);
+            }
+        })();
+        /* 导航阴影 */
+        const nav=document.getElementById("nav");
+        window.addEventListener("scroll",()=>{
+            if(scrollY>40){
+                nav.classList.add("scrolled");
+            }else{
+                nav.classList.remove("scrolled");
+            }
+        });
+        /* 滚动出现 */
+        const observer=new IntersectionObserver(entries=>{
+            entries.forEach(entry=>{
+                if(entry.isIntersecting){
+                    entry.target.classList.add("visible");
+                }
+            });
+        },{threshold:.15});
+        document.querySelectorAll(".reveal")
+        .forEach(el=>observer.observe(el));
+
+        // ==========注释原来的表单AJAX提交代码，交给formspree原生提交=========
+        /*
+        document.getElementById("betaForm")
+        .addEventListener("submit",function(e){
+            e.preventDefault();
+            const email=document.getElementById("email").value.trim();
+            const reg=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!reg.test(email)){
+                alert("请输入正确的邮箱地址");
+                return;
+            }
+            document.getElementById("success")
+            .classList.add("show");
+            this.reset();
+        });
+        */
+
+        /* 跳转 */
+        function scrollToForm(){
+            document.getElementById("apply")
+            .scrollIntoView({ behavior:"smooth" });
+        }
+    </script>
+</body>
+</html>
